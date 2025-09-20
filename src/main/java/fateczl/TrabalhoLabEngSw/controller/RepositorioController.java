@@ -152,8 +152,15 @@ public class RepositorioController {
 		//return carregaRepositorios(user_id);
 		return mv;
 	}
-	@PostMapping("/baixarRepositorio")
-	public ModelAndView baixarRepositorio(@RequestParam Map<String, String> params,
+	/**
+	 * Baixa os arquivos de um determinado commit
+	 * @param params
+	 * @param user_id
+	 * @return
+	 * @throws IOException
+	 */
+	@PostMapping("/baixarCommit")
+	public ModelAndView baixarCommit(@RequestParam Map<String, String> params,
 			@CookieValue(name = "user_id", defaultValue = "") String user_id) throws IOException {
 	    Long commitId = Long.valueOf(params.get("commit_id"));
 	    Long repId = Long.valueOf(params.get("rep_id"));
@@ -161,6 +168,27 @@ public class RepositorioController {
     	for (Arquivo a : arquivos) {
     		arqControl.download(a);
     	}
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("login/login");
+		mv.addObject("usuario", new Usuario());
+		return mv;
+	}
+
+	/**
+	 * Baixa a versão mais recente de todos os arquivos do repositorio
+	 * @param params
+	 * @param user_id
+	 * @return
+	 * @throws IOException
+	 */
+	@PostMapping("/baixarRepositorio") 
+	public ModelAndView baixarRepositorio(@RequestParam Map<String, String> params,
+			@CookieValue(name = "user_id", defaultValue = "") String user_id) throws IOException {
+		Long repId = Long.valueOf(params.get("rep_id"));
+		List<Arquivo> arquivos = arqControl.findLastByRepositorio(repId);
+		for (Arquivo a : arquivos) {
+			arqControl.download(a);
+		}
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName("login/login");
 		mv.addObject("usuario", new Usuario());

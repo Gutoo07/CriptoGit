@@ -114,8 +114,41 @@ select id as diretorio, nome, commite_id, diretorio_pai_id from diretorio
 select id as arquivo, nome, blob_id, diretorio_pai_id from arquivo
 select id as blob, conteudo, sha1 id_sha1 from blob
 
-select * from arquivo a
-inner join
+--selecionar todos os arquivos de um repositório
+select a.nome from arquivo a
+inner join diretorio d on a.diretorio_pai_id = d.id
+inner join commite c on d.commite_id = c.id
+inner join repositorio r on c.repositorio_origem_id = r.id
+where r.id = 49
+
+--selecionar a versão mais recente de um arquivo de um repositório
+select max(a.id) as id_mais_recente from arquivo a
+inner join diretorio d on a.diretorio_pai_id = d.id
+inner join commite c on d.commite_id = c.id
+inner join repositorio r on c.repositorio_origem_id = r.id
+where r.id = 49 and a.nome = 'upload tcc/teste.txt'
+
+--selecionara a versão mais recente de todos os arquivos de um repositório
+	WITH LatestFiles AS (SELECT a.nome, MAX(c.id) as latest_commit_id
+		FROM arquivo a
+		INNER JOIN diretorio d ON a.diretorio_pai_id = d.id
+		INNER JOIN commite c ON d.commite_id = c.id
+		INNER JOIN repositorio r ON c.repositorio_origem_id = r.id
+		WHERE r.id = 49
+		GROUP BY a.nome)
+	SELECT a.*
+	FROM arquivo a
+	INNER JOIN diretorio d ON a.diretorio_pai_id = d.id
+	INNER JOIN commite c ON d.commite_id = c.id
+	INNER JOIN LatestFiles lf ON a.nome = lf.nome AND c.id = lf.latest_commit_id
+	INNER JOIN repositorio r ON c.repositorio_origem_id = r.id
+	WHERE r.id = 49
+	ORDER BY a.nome
+
+select * from arquivo 
+delete from arquivo where id = 10155
+select * from blob
+delete from blob where id = 10115
 
 select top 1 * from commite
 order by id desc

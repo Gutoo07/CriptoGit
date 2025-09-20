@@ -264,11 +264,15 @@
 
 	      <!-- Botões de ação -->
 	    <div style="margin-top: 30px;" >
-	    	<form method="post" th:action="@{/baixarRepositorio}" th:if="${commit != null}">
+	    	<form method="post" th:action="@{/baixarCommit}" th:if="${commit != null}">
 				<input type="hidden" id="commit_id" name="commit_id" th:value="${commit.id}">
 				<input type="hidden" id="rep_id" name="rep_id" th:value="${repositorio.id}">
-		        <button class="btn-download">📥 Baixar repositório</button>
+		        <button class="btn-download">📥 Baixar commit</button>
 	        </form>
+
+			<div>
+				<button class="btn-download" @click="baixarRepositorio">📥 Baixar repositório</button>
+			</div>
 	    	
 			<button th:onclick="'window.location.href = \'/upload?rep_id=' + ${repositorio.id} + '\''" class="btn-commit">	
 				✅ Fazer novo commit
@@ -379,13 +383,23 @@
 					}
 				};
 				
+				const baixarRepositorio = async () => {
+					// Pega o id do repositório
+					const repId = document.getElementById('rep_id').value;
+
+					const response = await fetch(`/api/repositorio/${repId}/latest-files`);
+					const arquivos = await response.json();
+					console.log("Arquivos do repositório:", arquivos);					
+				};
+				
 				// Retornar tudo que será usado no template Vue.js
 				return {
 					arquivos,
 					commitInfo,
 					loading,
 					getCommit,
-					getCommitInfo
+					getCommitInfo,
+					baixarRepositorio
 				};
 			}
 		}).mount('#vue-app');
